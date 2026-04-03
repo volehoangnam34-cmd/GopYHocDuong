@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Tin Góp Ý Học Đường</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; transition: 0.2s; }
+    body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+    /* TASKBAR CỐ ĐỊNH */
+    .navbar {
+      background: var(--white);
+      border-bottom: 2px solid var(--primary);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: 70px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-container {
+      max-width: 1100px;
+      margin: auto;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+    .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); margin: 0; }
+
+    .font-bar { display: flex; align-items: center; gap: 5px; }
+    .font-bar button { padding: 5px 12px; cursor: pointer; border: 1px solid var(--border); border-radius: 4px; background: white; font-weight: bold; }
+
+    nav#menu-items { display: flex; gap: 10px; }
+    nav#menu-items button { 
+      background: none; border: none; font-weight: 600; color: #64748b; cursor: pointer; padding: 10px; border-radius: 5px;
+    }
+    nav#menu-items button.active { color: var(--primary); background: #eef2ff; }
+
+    /* NỘI DUNG */
+    .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+    #content-area { font-size: 16px; } 
+
+    .card { background: var(--white); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    input, select, textarea { 
+      width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; 
+    }
+    .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: 700; cursor: pointer; }
+    .btn-outline-danger { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 8px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: 600; }
+
+    /* FEEDBACK ITEM */
+    .fb-item { 
+      background: white; padding: 20px; border-radius: 10px; border-left: 6px solid var(--primary); 
+      margin-bottom: 20px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .fb-meta { font-size: 0.85rem; color: #64748b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .fb-text { margin-bottom: 15px; line-height: 1.6; }
+    
+    .reply-box {
+      background: #fff7ed;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+      border: 1px dashed #fdba74;
+    }
+    .reply-header { font-weight: bold; color: #c2410c; font-size: 0.85rem; margin-bottom: 5px; }
+
+    .admin-tools { 
+      margin-top: 15px; 
+      padding-top: 15px; 
+      border-top: 1px solid #f1f5f9; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+    }
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+    .badge-all { background: #dcfce7; color: #166534; }
+    .badge-teacher { background: #fef9c3; color: #854d0e; }
+    .badge-private { background: #fee2e2; color: #991b1b; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="nav-container">
+      <h2 class="logo">💬 Góp Ý Học Đường</h2>
+      
+      <div class="font-bar">
+        <button onclick="changeFS(-2)">A-</button>
+        <button onclick="changeFS(2)">A+</button>
+      </div>
+
+      <nav id="menu-items" class="hidden">
+        <button id="nav-view" onclick="show('viewPage')">Bản tin</button>
+        <button id="nav-submit" onclick="show('submitPage')">Gửi góp ý</button>
+        <button onclick="logout()" style="color:var(--danger)">Thoát</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="content-area">
+    
+    <!-- LOGIN -->
+    <section id="loginPage" class="page active">
+      <div class="card" style="max-width: 400px; margin: auto; text-align: center;">
+        <h3>Đăng nhập</h3>
+        <input type="text" id="u-name" placeholder="Tên của bạn...">
+        <select id="u-role">
+          <option value="student">Học sinh</option>
+          <option value="teacher">Giáo viên</option>
+          <option value="admin">Ban giám hiệu</option>
+        </select>
+        <button onclick="login()" class="btn-main">Bắt đầu</button>
+      </div>
+    </section>
+
+    <!-- SUBMIT -->
+    <section id="submitPage" class="page">
+      <div class="card">
+        <h3>Tạo góp ý</h3>
+        <textarea id="f-content" placeholder="Nội dung chia sẻ của bạn..." rows="4"></textarea>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div>
+              <label><small>Chủ đề</small></label>
+              <select id="f-topic">
+                  
+                  <option>Học tập</option>
+                  <option>Giảng dạy</option>
+                  <option>Hoạt động của trường</option>
+                  <option>Cơ sở vật chất</option>
+                  <option>Ngoại khóa</option>
+                  <option>Căn tin</option>
+                  <option>Góp ý khác</option>
+              </select>
+            </div>
+            <div>
+              <label><small>Quyền xem</small></label>
+              <select id="f-visibility">
+                  <option value="all">Công khai toàn trường</option>
+                  <option value="teachers">Chỉ Giáo viên & BGH thấy</option>
+                  <option value="private">Chỉ Ban giám hiệu thấy</option>
+                  <option value="me">Chỉ mình tôi (Nháp)</option>
+              </select>
+            </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <label style="display: flex; align-items: center; gap: 8px;"></label>
+            <input type="checkbox" id="f-anon" style="width: auto; margin: 0;">
+            Gửi ẩn danh (Không hiện tên)
+          </label>
+        </div>
+        <button onclick="send()" class="btn-main" style="margin-top:15px;">Đăng góp ý</button>
+      </div>
+    </section>
+
+    <!-- VIEW -->
+    <section id="viewPage" class="page">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin:0">Bản tin học đường</h3>
+          <div id="admin-reset-zone" class="hidden">
+              <button class="btn-outline-danger" style="margin:0; padding: 5px 10px;" onclick="resetAllData()">⚠️ Reset Bảng Tin</button>
+          </div>
+      </div>
+      <div id="list"></div>
+    </section>
+
+  </main>
+
+  <script>
+    let user = JSON.parse(localStorage.getItem('user'));
+    let posts = JSON.parse(localStorage.getItem('posts')) || [];
+    let fs = 16;
+
+    function changeFS(n) { fs += n; document.getElementById('content-area').style.fontSize = fs+"px"; }
+
+    function login() {
+      const name = document.getElementById('u-name').value;
+      const role = document.getElementById('u-role').value;
+      if(!name) return alert("Vui lòng nhập tên!");
+      user = { name, role };
+      localStorage.setItem('user', JSON.stringify(user));
+      init();
+    }
+
+    function logout() { localStorage.removeItem('user'); location.reload(); }
+
+    function show(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      if(id === 'viewPage') { render(); document.getElementById('nav-view').classList.add('active'); }
+      if(id === 'submitPage') document.getElementById('nav-submit').classList.add('active');
+    }
+
+    function send() {
+      const content = document.getElementById('f-content').value;
+      if(!content) return;
+      const post = {
+        id: Date.now(),
+        author: user.name,
+        role: user.role,
+        content: content,
+        topic: document.getElementById('f-topic').value,
+        visibility: document.getElementById('f-visibility').value,
+        anon: document.getElementById('f-anon').checked,
+        reply: "",
+        time: new Date().toLocaleString('vi-VN')
+      };
+      posts.unshift(post);
+      localStorage.setItem('posts', JSON.stringify(posts));
+      document.getElementById('f-content').value = "";
+      alert("Góp ý đã được đăng!");
+      show('viewPage');
+    }
+
+    // Xóa một bài
+    window.removePost = (id) => {
+      if(!confirm("Xác nhận gỡ bài này?")) return;
+      posts = posts.filter(p => p.id !== id);
+      localStorage.setItem('posts', JSON.stringify(posts));
+      render();
+    };
+
+    // Xóa TOÀN BỘ (Dành cho Admin)
+    window.resetAllData = () => {
+      if(!confirm("CẢNH BÁO: Hành động này sẽ xóa sạch TOÀN BỘ góp ý trên hệ thống. Bạn có chắc chắn?")) return;
+      posts = [];
+      localStorage.setItem('posts', JSON.stringify(posts));
+      render();
+    };
+
+    // Phản hồi bài viết
+    window.submitReply = (id) => {
+      const rText = document.getElementById(`reply-input-${id}`).value;
+      if(!rText) return;
+      const p = posts.find(x => x.id === id);
+      p.reply = rText;
+      localStorage.setItem('posts', JSON.stringify(posts));
+      render();
+    };
+
+    function render() {
+      const list = document.getElementById('list');
+      list.innerHTML = "";
+      
+      // Hiện nút Reset nếu là Admin
+      if(user.role === 'admin') document.getElementById('admin-reset-zone').classList.remove('hidden');
+
+      const filtered = posts.filter(p => {
+          if(user.role === 'admin') return true; // BGH thấy hết
+          if(p.author === user.name) return true; // Mình thấy bài mình
+          
+          if(p.visibility === 'all') return true; // Bài công khai
+          if(p.visibility === 'teachers' && (user.role === 'teacher')) return true; // GV thấy bài gửi GV
+          
+          return false;
+      });
+
+      if(filtered.length === 0) {
+        list.innerHTML = "<p style='text-align:center; color:gray; margin-top:50px;'>Chưa có góp ý nào phù hợp để hiển thị.</p>";
+        return;
+      }
+
+      filtered.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'fb-item';
+        const isManager = (user.role === 'admin' || user.role === 'teacher');
+        
+        let visBadge = `<span class="badge badge-all">Công khai</span>`;
+        if(p.visibility === 'teachers') visBadge = `<span class="badge badge-teacher">Nội bộ GV</span>`;
+        if(p.visibility === 'private' || p.visibility === 'me') visBadge = `<span class="badge badge-private">Bí mật</span>`;
+
+        div.innerHTML = `
+          <div class="fb-meta">
+            <span><b>[${p.topic}]</b> • ${p.time}</span>
+            ${visBadge}
+          </div>
+          <div class="fb-text">${p.content}</div>
+          <div style="font-size:0.8rem; color:#64748b;">
+            Người gửi: ${p.anon ? '<i>(Ẩn danh)</i>' : `<b>${p.author}</b>`}
+          </div>
+          
+          ${p.reply ? `
+            <div class="reply-box">
+              <div class="reply-header">💬 Phản hồi chính thức:</div>
+              <div>${p.reply}</div>
+            </div>
+          ` : ''}
+
+          ${isManager ? `
+            <div class="admin-tools">
+              ${!p.reply ? `
+                <div style="display:flex; gap:5px;">
+                  <input id="reply-input-${p.id}" placeholder="Viết phản hồi..." style="margin:0; padding:5px; font-size:0.8rem;">
+                  <button onclick="submitReply(${p.id})" style="background:var(--success); color:white; border:none; border-radius:4px; cursor:pointer; padding:0 10px;">Gửi</button>
+                </div>
+              ` : ''}
+              <button class="btn-outline-danger" style="font-size:0.7rem; padding:4px;" onclick="removePost(${p.id})">🗑 Gỡ bài này</button>
+            </div>
+          ` : ''}
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function init() {
+      if(user) {
+        document.getElementById('menu-items').classList.remove('hidden');
+        document.getElementById('loginPage').classList.remove('active');
+        show('viewPage');
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
